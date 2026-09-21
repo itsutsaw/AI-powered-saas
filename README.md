@@ -62,34 +62,6 @@ Browser → Next.js API → Clerk authentication → Cloudinary upload → Neon 
 
 HTML knowledge transfers to JSX (HTML-like markup in JavaScript). React `useState` stores values that change the screen. `useEffect` runs work such as loading a preview. An API route runs on the server, where secrets remain private. PostgreSQL stores metadata; Cloudinary stores media bytes. This version uses SQL directly instead of Prisma to reduce initial setup.
 
-## Your shortest learning path
-
-1. Run the demo and explain what happens when you select a format.
-2. Read `formats` in `lib/media.js`; add one custom format and verify its downloaded dimensions.
-3. Connect the services and follow one upload from the browser through the API to the database.
-4. Change the branding and add one feature you can explain: before/after comparison, file search, or deletion with ownership checks.
-5. Deploy, record a short demo, and write your own README with screenshots and your design decisions.
-
-## Verify and deploy
-
-```bash
-npm test
-npm run build
-npm start
-```
-
-Use a Next.js-compatible Node host such as Vercel. Set the project root to this folder, add the environment variables through the host's dashboard, run the SQL schema in Neon, and configure the production domain and production keys in Clerk. The 4 MB cap keeps upload bodies small for hosts with request-size limits; it is intentionally restrictive for video. Larger videos need signed direct-to-Cloudinary uploads plus authenticated completion verification, rather than increasing this server upload limit.
-
-Before sharing publicly, verify sign-in, both uploads, downloads, history after refresh, and separation between two users. Set provider usage alerts. This starter has no payments, subscriptions, deletion UI, resumable uploads, or durable processing jobs. For a public service, add atomic quotas/rate limits, lifecycle cleanup, and monitoring. The current daily limit is a convenience check and may be exceeded by simultaneous requests.
-
-## Honest resume wording
-
-After connecting and verifying live mode, adapt:
-
-> Built a full-stack media studio with Next.js, Clerk, Cloudinary, and PostgreSQL, supporting authenticated uploads, content-aware image cropping, video optimization, and user-scoped media history.
-
-Credit the course inspiration in your repository and describe your own additions. Do not claim measured compression percentages, production scale, paying users, or custom model training without evidence. If you have only run the demo, describe it as a browser-based image formatting prototype.
-
 ## Reference documentation
 
 - https://nextjs.org/docs/app
