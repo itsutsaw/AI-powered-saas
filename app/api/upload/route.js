@@ -32,7 +32,7 @@ export async function POST(request) {
         .uploader.upload_stream(
           {
             resource_type: kind,
-            folder: "mediaforge",
+            folder: "morfynx",
             ...(kind === "video"
               ? { transformation: [{ quality: "auto", fetch_format: "mp4" }] }
               : {}),

@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Try the sample illustration, select Story, and download the JPEG. Next, upload your own image. Open Media library to find it again.
+Open http://localhost:3000. Try the sample illustration, select Story, and download the JPEG. Next, upload your own image. Open My library to find it again.
 
 No `.env.local` is needed for demo mode. Images are center-cropped inside your browser using Canvas. Demo files stay in memory and disappear on refresh. Videos can be previewed and downloaded unchanged. **The demo does not perform AI cropping or video compression.**
 
@@ -38,7 +38,7 @@ Create projects in [Clerk](https://dashboard.clerk.com), [Cloudinary](https://co
 3. In Cloudinary, copy the cloud name, API key, and API secret into the matching variables. No unsigned upload preset is needed; the backend uploads with the SDK.
 4. In Neon, create a project and copy its PostgreSQL connection string, including its SSL parameters, into `DATABASE_URL`.
 5. Open Neon's SQL Editor and run the contents of `schema.sql` once. This creates the media table and its index.
-6. Stop the development server with Ctrl+C and run `npm run dev` again. When all six values exist, the badge changes to LIVE MODE.
+6. Stop the development server with Ctrl+C and run `npm run dev` again. When all six values exist, the app enables live uploads and account sign-in.
 7. Sign in, upload a small image, select Story, and download it. Upload a short MP4, then refresh the library to verify persistence.
 8. Test with another account: it should see only its own uploads.
 

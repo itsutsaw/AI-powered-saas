@@ -1,7 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 export const metadata = {
-  title: "MediaForge — Your content, every format",
+  title: "Morfynx — Your content, every format",
   description: "An image and video studio powered by Cloudinary.",
 };
 export default function RootLayout({ children }) {

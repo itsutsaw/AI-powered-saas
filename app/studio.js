@@ -165,9 +165,9 @@ export default function Studio({ live }) {
       a.href = objectUrl;
       a.download =
         asset.kind === "image"
-          ? `mediaforge-${selected.width}x${selected.height}.jpg`
+          ? `morfynx-${selected.width}x${selected.height}.jpg`
           : asset.public_id
-            ? "mediaforge-optimized.mp4"
+            ? "morfynx-optimized.mp4"
             : asset.title;
       document.body.appendChild(a);
       a.click();
@@ -192,7 +192,7 @@ export default function Studio({ live }) {
     <div className="app">
       <header className="header">
         <a className="brand" href="/">
-          MediaForge
+          Morfynx
         </a>
         <div className="account">
           {!live && <span className="badge">Demo</span>}
