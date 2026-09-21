@@ -2,6 +2,8 @@
 
 A beginner-friendly JavaScript / React / Next.js media studio inspired by Hitesh Choudhary’s [AI SaaS project](https://github.com/hiteshchoudhary/ai-saas-cloudinary). This is a new implementation, not a copy of the course repository.
 
+**Live Here -> ** https://mediaforge-nu.vercel.app/
+
 ## Start here — no accounts needed
 
 Install Node.js 22 LTS or newer from https://nodejs.org. Open this folder in your editor and run:
