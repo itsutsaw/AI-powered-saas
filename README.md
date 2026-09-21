@@ -1,8 +1,8 @@
-# MediaForge
+# Morfynx
 
 A beginner-friendly JavaScript / React / Next.js media studio.
 
-**Live Here -> ** https://mediaforge-nu.vercel.app/
+**Live Here -> ** https://morfynx.vercel.app/
 
 ## Start here — no accounts needed
 
