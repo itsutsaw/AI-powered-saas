@@ -141,7 +141,9 @@ export default function Studio({ live }) {
       setNotice(
         kind === "video" && !live
           ? "Video loaded for preview. Compression requires live mode; demo downloads keep the original file."
-          : "Ready. Choose your format and download.",
+          : kind === "video"
+            ? "Your video is ready to download."
+            : "Ready. Choose your format and download.",
       );
     } catch (error) {
       setNotice(error.message || "Upload failed. Try again.");
@@ -187,358 +189,238 @@ export default function Studio({ live }) {
       setAsset(items.find((item) => item.kind === "video") || null);
   }
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <a href="/" className="brand">
-          <span className="logo">
-            m<span>✦</span>
-          </span>
-          mediaforge<span className="brand-dot">.</span>
+    <div className="app">
+      <header className="header">
+        <a className="brand" href="/">
+          MediaForge
         </a>
-        <div className="workspace">
-          <span className="avatar">M</span>
-          <div>
-            My workspace<small>Creator studio</small>
-          </div>
-          <span className="chevron">⌄</span>
+        <div className="account">
+          {!live && <span className="badge">Demo</span>}
+          {live && <Account />}
         </div>
-        <p className="nav-label">WORKSPACE</p>
-        <nav>
+      </header>
+      <main>
+        <nav aria-label="Media tools">
           {[
-            ["image", "▧", "Image studio"],
-            ["video", "▷", "Video studio"],
-            ["library", "▦", "Media library"],
-          ].map(([id, icon, label]) => (
+            ["image", "Images"],
+            ["video", "Videos"],
+            ["library", "My library"],
+          ].map(([id, label]) => (
             <button
               key={id}
-              className={tab === id ? "nav-item active" : "nav-item"}
+              disabled={busy}
+              aria-current={tab === id ? "page" : undefined}
+              className={tab === id ? "nav-button active" : "nav-button"}
               onClick={() => switchTab(id)}
             >
-              <span>{icon}</span>
               {label}
-              {id === "image" && <em>AI</em>}
             </button>
           ))}
         </nav>
-        <div className="sidebar-bottom">
-          <div className="tip">
-            <span>✧</span>
-            <strong>Make more of your media.</strong>
-            <p>
-              One image. Every platform.
-              <br />A lot less busywork.
-            </p>
-          </div>
-          <div className="mode">
-            <i />
-            {live ? "Cloud workspace" : "Local demo workspace"}
-          </div>
+        <div className="intro">
+          <h1>
+            {tab === "image"
+              ? "Resize an image"
+              : tab === "video"
+                ? "Optimize a video"
+                : "My library"}
+          </h1>
+          <p>
+            {tab === "image"
+              ? "Upload an image, choose a size, and download."
+              : tab === "video"
+                ? "Upload a short video and download the optimized file."
+                : live
+                  ? "Your latest 50 uploads."
+                  : "Files from this session. Refreshing clears this library."}
+          </p>
         </div>
-      </aside>
-      <div className="main">
-        <header>
-          <div>
-            Workspace <span>/</span>{" "}
-            <strong>
-              {tab === "image"
-                ? "Image studio"
-                : tab === "video"
-                  ? "Video studio"
-                  : "Media library"}
-            </strong>
-          </div>
-          <div className="header-right">
-            <span className="badge">{live ? "LIVE MODE" : "DEMO MODE"}</span>
-            {live ? <Account /> : <span className="avatar">You</span>}
-          </div>
-        </header>
-        <main>
-          <div className="heading">
-            <div>
-              <p className="eyebrow">YOUR CONTENT, EVERY FORMAT</p>
-              <h1>
-                {tab === "image"
-                  ? "Big ideas. Perfectly framed."
-                  : tab === "video"
-                    ? "Less weight. More impact."
-                    : "All your media, together."}
-              </h1>
-              <p>
-                {tab === "image"
-                  ? "Turn one image into content for every corner of the internet."
-                  : tab === "video"
-                    ? "Upload, optimize, and share your next great story."
-                    : live
-                      ? "Your latest 50 uploads, saved to your account."
-                      : "Your uploads from this session. Refreshing clears the demo library."}
+        {!live && (
+          <p className="demo-note">
+            Demo: images use a centered crop. Videos stay unchanged. Connect
+            your services to enable AI cropping and video compression.
+          </p>
+        )}
+        <p
+          role="status"
+          aria-live="polite"
+          className={notice ? "notice" : "notice empty"}
+        >
+          {notice}
+        </p>
+        {tab === "library" ? (
+          <section className="library" aria-label="Saved media">
+            {items.length ? (
+              items.map((item) => (
+                <button
+                  className="media-card"
+                  key={item.id}
+                  onClick={() => {
+                    setTab(item.kind);
+                    setAsset(item);
+                  }}
+                >
+                  {item.kind === "image" ? (
+                    <img src={item.url} alt="" />
+                  ) : (
+                    <div className="video-placeholder">Video</div>
+                  )}
+                  <strong>{item.title}</strong>
+                  <span>
+                    {item.kind} · {sizeLabel(Number(item.original_bytes))}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <div className="empty-library">
+                <h2>No uploads yet</h2>
+                <p>Your images and videos will appear here.</p>
+                <button
+                  className="button primary"
+                  onClick={() => switchTab("image")}
+                >
+                  Upload an image
+                </button>
+              </div>
+            )}
+          </section>
+        ) : (
+          <div className="studio-grid">
+            <section className="controls" aria-label="Upload and settings">
+              <h2>1. Upload {tab === "image" ? "an image" : "a video"}</h2>
+              <button
+                className="dropzone"
+                disabled={busy}
+                onClick={() => input.current?.click()}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  upload(event.dataTransfer.files[0]);
+                }}
+              >
+                <strong>{busy ? "Processing…" : "Choose a file"}</strong>
+                <span>or drag and drop here</span>
+              </button>
+              <p className="hint">
+                {tab === "image" ? "JPG, PNG or WebP" : "MP4 or WebM"} · Maximum
+                4 MB
               </p>
-            </div>
-            <span className="heading-spark">✳</span>
-          </div>
-          {!live && (
-            <div className="demo-note">
-              <span>◉</span>
-              <p>
-                <strong>Try it right here.</strong> Images crop locally. AI
-                cropping, video compression, sign-in, and saved history activate
-                after service setup.
-              </p>
-            </div>
-          )}
-          <div
-            role="status"
-            aria-live="polite"
-            className={notice ? "notice" : "notice empty"}
-          >
-            {notice}
-          </div>
-          {tab === "library" ? (
-            <section className="library">
-              {items.length ? (
-                items.map((item) => (
-                  <button
-                    className="media-card"
-                    key={item.id}
-                    onClick={() => {
-                      setTab(item.kind);
-                      setAsset(item);
-                    }}
+              <input
+                ref={input}
+                type="file"
+                aria-label={`Upload ${tab}`}
+                accept={
+                  tab === "image"
+                    ? "image/jpeg,image/png,image/webp"
+                    : "video/mp4,video/webm"
+                }
+                onChange={(event) => upload(event.target.files?.[0])}
+                hidden
+              />
+              {asset && (
+                <p className="filename">
+                  {asset.id === "sample"
+                    ? "Sample image — try a size below"
+                    : asset.title}
+                </p>
+              )}
+              {tab === "image" ? (
+                <>
+                  <label className="setting-label" htmlFor="format">
+                    2. Choose a size
+                  </label>
+                  <select
+                    id="format"
+                    value={format}
+                    onChange={(event) => setFormat(Number(event.target.value))}
                   >
-                    {item.kind === "image" ? (
-                      <img src={item.url} alt="" />
-                    ) : (
-                      <div className="video-placeholder">▷</div>
-                    )}
-                    <strong>{item.title}</strong>
-                    <span>
-                      {item.kind} · {sizeLabel(Number(item.original_bytes))}
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <div className="empty-library">
-                  <span>▦</span>
-                  <h2>Your next creation starts here.</h2>
-                  <p>
-                    Upload an image or video and it will appear in your library.
+                    {formats.map((item, index) => (
+                      <option key={item.name} value={index}>
+                        {item.name} ({item.width} × {item.height})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="hint">
+                    {asset?.public_id
+                      ? "AI cropping keeps the main subject in frame."
+                      : "This preview uses a centered crop."}
                   </p>
-                  <button
-                    className="button primary"
-                    onClick={() => switchTab("image")}
-                  >
-                    Open image studio →
-                  </button>
+                </>
+              ) : (
+                <div className="video-details">
+                  <h2>2. Automatic optimization</h2>
+                  <p>
+                    {live
+                      ? "Quality is adjusted automatically. File size savings depend on the original video."
+                      : "Demo mode previews and downloads your original video."}
+                  </p>
+                  {asset && live && (
+                    <p>
+                      Original: {sizeLabel(Number(asset.original_bytes))}
+                      <br />
+                      Output: {sizeLabel(Number(asset.output_bytes))}
+                    </p>
+                  )}
                 </div>
               )}
+              <button
+                className="button primary download"
+                disabled={
+                  busy ||
+                  exporting ||
+                  !asset ||
+                  (tab === "image" && (!preview || previewBusy))
+                }
+                onClick={download}
+              >
+                {exporting ? "Preparing download…" : `Download ${tab}`}
+              </button>
             </section>
-          ) : (
-            <div className="studio-grid">
-              <section className="controls">
-                <div className="panel">
-                  <div className="step-title">
-                    <span>01</span>
-                    <h2>Add your {tab}</h2>
-                  </div>
-                  <button
-                    disabled={busy}
-                    className="dropzone"
-                    onClick={() => input.current?.click()}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      upload(event.dataTransfer.files[0]);
-                    }}
-                  >
-                    <span className="upload-icon">↑</span>
-                    <strong>
-                      {busy ? "Processing your upload…" : "Drop your file here"}
-                    </strong>
-                    <span>
-                      or <u>browse files</u>
-                    </span>
-                    <small>
-                      {tab === "image" ? "JPG, PNG, WebP" : "MP4, WebM"} · up to
-                      4 MB
-                    </small>
-                  </button>
-                  <input
-                    ref={input}
-                    type="file"
-                    aria-label={`Upload ${tab}`}
-                    accept={
-                      tab === "image"
-                        ? "image/jpeg,image/png,image/webp"
-                        : "video/mp4,video/webm"
-                    }
-                    onChange={(event) => upload(event.target.files?.[0])}
-                    hidden
-                  />
-                  {asset && (
-                    <div className="file-info">
-                      <span>✓</span>
-                      <div>
-                        <strong>{asset.title}</strong>
-                        <small>
-                          {asset.id === "sample"
-                            ? "Sample illustration · ready to try"
-                            : `${sizeLabel(Number(asset.original_bytes))} · ${live ? "Saved to your library" : "On your device"}`}
-                        </small>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="panel">
-                  <div className="step-title">
-                    <span>02</span>
-                    <h2>
-                      {tab === "image" ? "Choose a format" : "Optimization"}
-                    </h2>
-                  </div>
-                  {tab === "image" ? (
-                    <div className="formats">
-                      {formats.map((item, index) => (
-                        <button
-                          key={item.name}
-                          className={
-                            format === index ? "format selected" : "format"
-                          }
-                          onClick={() => setFormat(index)}
-                          aria-pressed={format === index}
-                        >
-                          <span
-                            className="format-shape"
-                            style={{
-                              aspectRatio: `${item.width}/${item.height}`,
-                            }}
-                          />
-                          <div>
-                            <strong>{item.name}</strong>
-                            <small>{item.label}</small>
-                          </div>
-                          <span className="radio" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="video-details">
-                      <h3>{live ? "Automatic quality" : "Preview mode"}</h3>
-                      <p>
-                        {live
-                          ? "Cloudinary adjusts quality and exports MP4. Results depend on the source; some files may not shrink."
-                          : "Connect your services to compress videos. You can preview a short clip here now."}
-                      </p>
-                      {asset && live && (
-                        <p>
-                          Original: {sizeLabel(Number(asset.original_bytes))}
-                          <br />
-                          Output: {sizeLabel(Number(asset.output_bytes))}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  <div className="smart-note">
-                    ✧{" "}
-                    <span>
-                      {live && asset?.public_id
-                        ? "Cloudinary processing enabled"
-                        : tab === "image"
-                          ? "Demo uses a centered crop"
-                          : "Original video · no compression in demo"}
-                    </span>
-                  </div>
-                </div>
-              </section>
-              <section className="preview-panel">
-                <div className="preview-top">
-                  <h2>Preview</h2>
+            <section className="preview-panel" aria-label="Media preview">
+              <div className="preview-title">
+                <h2>Preview</h2>
+                {tab === "image" && (
                   <span>
-                    {tab === "image"
-                      ? `${selected.width} × ${selected.height} px`
-                      : "Video player"}
+                    {selected.width} × {selected.height}
                   </span>
-                </div>
-                <div className="preview-canvas">
-                  {tab === "image" && preview ? (
-                    <img
-                      className="preview-image"
-                      src={preview}
-                      alt={`${selected.name} crop preview`}
-                      onLoad={() => setPreviewBusy(false)}
-                      onError={() => {
-                        setPreviewBusy(false);
-                        setPreview("");
-                        setNotice(
-                          "Preview failed. Check Cloudinary transformations or try another image.",
-                        );
-                      }}
-                    />
-                  ) : tab === "video" && asset ? (
-                    <video
-                      src={asset.url}
-                      controls
-                      onError={() =>
-                        setNotice(
-                          "Your browser could not play this video. Try MP4 with H.264 encoding.",
-                        )
-                      }
-                    />
-                  ) : (
-                    <div className="preview-empty">
-                      {tab === "image" && previewBusy
-                        ? "Preparing your preview…"
-                        : "Upload a file to see it here."}
-                    </div>
-                  )}
-                  <span className="canvas-label">
-                    {tab === "image"
-                      ? "MADE TO FIT. READY TO SHARE."
-                      : "YOUR NEXT STORY STARTS HERE."}
-                  </span>
-                </div>
-                <div className="preview-footer">
-                  <div>
-                    <strong>
-                      {tab === "image"
-                        ? selected.name
-                        : asset?.title || "Video preview"}
-                    </strong>
-                    <small>
-                      {tab === "image"
-                        ? "JPEG export · ready for your feed"
-                        : live
-                          ? "Optimized MP4 export"
-                          : "Original file download"}
-                    </small>
-                  </div>
-                  <button
-                    className="button primary"
-                    disabled={
-                      busy ||
-                      exporting ||
-                      !asset ||
-                      (tab === "image" && (!preview || previewBusy))
+                )}
+              </div>
+              <div className="preview-canvas">
+                {tab === "image" && preview ? (
+                  <img
+                    src={preview}
+                    alt={`${selected.name} crop preview`}
+                    onLoad={() => setPreviewBusy(false)}
+                    onError={() => {
+                      setPreviewBusy(false);
+                      setPreview("");
+                      setNotice(
+                        "Preview failed. Try another image or check your Cloudinary settings.",
+                      );
+                    }}
+                  />
+                ) : tab === "video" && asset ? (
+                  <video
+                    src={asset.url}
+                    controls
+                    onError={() =>
+                      setNotice(
+                        "This video could not be played. Try an MP4 with H.264 encoding.",
+                      )
                     }
-                    onClick={download}
-                  >
-                    {exporting
-                      ? "Preparing…"
-                      : tab === "image"
-                        ? "↓ Download image"
-                        : "↓ Download video"}
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
-          <footer>
-            <span>Built for your creative flow.</span>
-            <span>
-              MediaForge <span className="footer-star">✦</span>{" "}
-              {live ? "Powered by Cloudinary" : "Starter edition"}
-            </span>
-          </footer>
-        </main>
-      </div>
+                  />
+                ) : (
+                  <p>
+                    {tab === "image" && previewBusy
+                      ? "Preparing preview…"
+                      : "Your video will appear here."}
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
