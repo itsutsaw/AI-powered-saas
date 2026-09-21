@@ -1,6 +1,6 @@
 # MediaForge
 
-A beginner-friendly JavaScript / React / Next.js media studio inspired by Hitesh Choudhary’s [AI SaaS project](https://github.com/hiteshchoudhary/ai-saas-cloudinary). This is a new implementation, not a copy of the course repository. The course-to-repository match was not independently confirmed.
+A beginner-friendly JavaScript / React / Next.js media studio inspired by Hitesh Choudhary’s [AI SaaS project](https://github.com/hiteshchoudhary/ai-saas-cloudinary). This is a new implementation, not a copy of the course repository.
 
 ## Start here — no accounts needed
 
